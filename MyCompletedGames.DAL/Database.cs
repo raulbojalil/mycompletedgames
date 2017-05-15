@@ -7,10 +7,23 @@ using System.IO;
 using System.Linq;
 using System.Web;
 
-namespace MyCompletedGames
+namespace MyCompletedGames.DAL
 {
+    /// <summary>
+    /// Helper class to issue raw commands to the DB like INSERT and SELECT.
+    /// </summary>
     public class Database
     {
+        static string CONNECTION_STRING;
+
+        /// <summary>
+        /// Inits the Database
+        /// </summary>
+        /// <param name="connString"></param>
+        public static void Init(string connString)
+        {
+            CONNECTION_STRING = connString;
+        }
 
         public static bool StoreProcedureExists(string sprocName)
         {
@@ -18,14 +31,14 @@ namespace MyCompletedGames
         }
 
         public static byte[] ReadBinaryData(string query)
-        { 
-            
+        {
+
             int bufferSize = 100;
             byte[] outByte = new byte[bufferSize];
             long retval = 0;
             long startIndex = 0;
 
-            using (var conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            using (var conn = new SqlConnection(CONNECTION_STRING))
             {
                 using (var command = new SqlCommand(query, conn))
                 {
@@ -56,11 +69,11 @@ namespace MyCompletedGames
             }
         }
 
-       
+
 
         public static IEnumerable<SqlDataReader> ExecuteReader(string query)
         {
-            using (var conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            using (var conn = new SqlConnection(CONNECTION_STRING))
             {
                 using (var command = new SqlCommand(query, conn))
                 {
@@ -80,7 +93,7 @@ namespace MyCompletedGames
         public static object ExecuteScalar(string query)
         {
 
-            using (var conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            using (var conn = new SqlConnection(CONNECTION_STRING))
             {
                 using (var command = new SqlCommand(query, conn))
                 {
@@ -93,7 +106,7 @@ namespace MyCompletedGames
         public static int ExecuteNonQuery(string query)
         {
 
-            using (var conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            using (var conn = new SqlConnection(CONNECTION_STRING))
             {
                 using (var command = new SqlCommand(query, conn))
                 {
@@ -103,9 +116,9 @@ namespace MyCompletedGames
             }
         }
 
-        public static object ExecuteStoredProcedureScalar(string sproc, params string [] parameters)
+        public static object ExecuteStoredProcedureScalar(string sproc, params string[] parameters)
         {
-            using (var conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            using (var conn = new SqlConnection(CONNECTION_STRING))
             {
                 using (var command = new SqlCommand(sproc, conn) { CommandType = CommandType.StoredProcedure })
                 {
@@ -121,9 +134,9 @@ namespace MyCompletedGames
 
         public static int ExecuteStoredProcedureNonQuery(string sproc, byte[] image, params string[] parameters)
         {
-            using (var conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            using (var conn = new SqlConnection(CONNECTION_STRING))
             {
-                using (var command = new SqlCommand(sproc, conn){ CommandType = CommandType.StoredProcedure })
+                using (var command = new SqlCommand(sproc, conn) { CommandType = CommandType.StoredProcedure })
                 {
                     if (image != null)
                     {
@@ -144,12 +157,12 @@ namespace MyCompletedGames
 
         public static IEnumerable<SqlDataReader> ExecuteStoredProcedure(string sproc, params string[] parameters)
         {
-            using (var conn = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            using (var conn = new SqlConnection(CONNECTION_STRING))
             {
                 using (var command = new SqlCommand(sproc, conn) { CommandType = CommandType.StoredProcedure })
                 {
 
-                    
+
                     foreach (var p in parameters)
                     {
                         command.Parameters.Add(p.Split('=')[0], SqlDbType.VarChar).Value = p.Split('=')[1];
@@ -161,15 +174,15 @@ namespace MyCompletedGames
                         {
                             yield return reader;
                         }
-                    
+
                     }
 
-                   
+
                 }
             }
         }
 
-        
+
 
     }
 }

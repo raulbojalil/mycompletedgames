@@ -182,14 +182,10 @@
     <Compile Include="Controllers\API\PlatformsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PlatformsController.cs" />
-    <Compile Include="Database.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\AccountViewModels.cs" />
-    <Compile Include="Models\Game.cs" />
     <Compile Include="Models\IdentityModels.cs" />
-    <Compile Include="Models\Platform.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -250,6 +246,16 @@
     <Content Include="packages.config" />
     <None Include="Project_Readme.html" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MyCompletedGames.DAL\MyCompletedGames.DAL.csproj">
+      <Project>{7ddc769c-88fc-4304-89f5-fc575638c61f}</Project>
+      <Name>MyCompletedGames.DAL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyCompletedGames.Models\MyCompletedGames.Models.csproj">
+      <Project>{f0f9ff3c-8102-4cfa-9866-a6426c3dfb1e}</Project>
+      <Name>MyCompletedGames.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -1,4 +1,5 @@
-﻿using MyCompletedGames.Models;
+﻿using MyCompletedGames.DAL;
+using MyCompletedGames.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -15,12 +16,21 @@ namespace MyCompletedGames.Controllers
     {
         
         // GET: Platforms/Create
+        /// <summary>
+        /// Returns the Create Platform View
+        /// </summary>
+        /// <returns>Create Platform View</returns>
         public ActionResult Create()
         {
             return View();
         }
 
         // POST: Platforms/Create
+        /// <summary>
+        /// Creates a new Platform
+        /// </summary>
+        /// <param name="platform">The platform data</param>
+        /// <returns>Create Platform View if error. Redirects to Index if successful.</returns>
         [HttpPost]
         public ActionResult Create(Platform platform)
         {
@@ -32,12 +42,14 @@ namespace MyCompletedGames.Controllers
                     return View();
                 }
 
+                //Checks if the user uploaded a file
                 if (Request.Files.Count == 0 || Request.Files[0].ContentLength == 0)
                 {
                     ModelState.AddModelError("", "An image file is required.");
                     return View();
                 }
 
+                //Only image files are allowed
                 var fileExtension = Path.GetExtension(Request.Files[0].FileName).ToLower();
                 var contentType = Request.Files[0].ContentType.ToLower();
 
@@ -47,18 +59,22 @@ namespace MyCompletedGames.Controllers
                     return View(platform);
                 }
 
+                //Large files are not allowed
                 if (Request.Files[0].ContentLength > Convert.ToInt32(ConfigurationManager.AppSettings["MaxImageFileSize"]))
                 {
                     ModelState.AddModelError("", "The provided image is too large");
                     return View(platform);
                 }
 
+                //Save the image file to a temporary location to upload to the DB as varbinary
                 var uploadDir = Server.MapPath("~/App_Data/images");
                 Directory.CreateDirectory(uploadDir);
                 var filepath = Path.Combine(uploadDir, Path.GetRandomFileName() + ".png");
                 Request.Files[0].SaveAs(filepath);
 
-                Database.ExecuteStoredProcedureNonQuery("InsertPlatform", System.IO.File.ReadAllBytes(filepath), "@Name=" + platform.Name, "@Type=" + platform.Type);
+                //Call the stored procedure
+                platform.Image = filepath;
+                StoredProcedures.InsertPlatform(platform);
 
                 return RedirectToAction("Index", "Home");
             }
@@ -69,23 +85,38 @@ namespace MyCompletedGames.Controllers
             }
         }
 
+        // GET: Platforms/GetImage/5
+        /// <summary>
+        /// Gets the raw binary data of the platform Image stored in the DB
+        /// </summary>
+        /// <param name="id">Platform ID</param>
+        /// <returns>A File Content Result</returns>
         public ActionResult GetImage(int id)
         {
             return File(Database.ReadBinaryData("SELECT Image FROM Platforms WHERE ID = " + id), "image/png");
         }
 
-        
-
         // GET: Platforms/Edit/5
+        /// <summary>
+        /// Returns the Edit Platform View
+        /// </summary>
+        /// <param name="id">The platform ID</param>
+        /// <returns>Edit Platform View</returns>
         public ActionResult Edit(int id)
         {
-            foreach (var platform in Database.ExecuteStoredProcedure("GetPlatformById", "@ID=" + id))
-                return View(new Platform() { Name = platform["Name"].ToString(), Type = Convert.ToInt32(platform["Type"]), Image = Url.Action("GetImage", "Platforms", new { id = platform["ID"] }) } );
+            var platform = StoredProcedures.GetPlatformById(id);
+            platform.Image = Url.Action("GetImage", "Platforms", new { id = id });
 
-            return View();
+            return View(platform);
         }
 
         // POST: Platforms/Edit/5
+        /// <summary>
+        /// Edits a Platform
+        /// </summary>
+        /// <param name="id">The platform ID</param>
+        /// <param name="platform">Platform data</param>
+        /// <returns>Edit Platform View if error. Redirects to Index if successful.</returns>
         [HttpPost]
         public ActionResult Edit(int id, Platform platform)
         {
@@ -97,12 +128,14 @@ namespace MyCompletedGames.Controllers
                     return View(platform);
                 }
 
+                //Checks if the user uploaded a file
                 if (Request.Files.Count == 0 || Request.Files[0].ContentLength == 0)
                 {
                     ModelState.AddModelError("", "An image file is required.");
                     return View(platform);
                 }
 
+                //Only image files are allowed
                 var fileExtension = Path.GetExtension(Request.Files[0].FileName).ToLower();
                 var contentType = Request.Files[0].ContentType.ToLower();
 
@@ -112,17 +145,23 @@ namespace MyCompletedGames.Controllers
                     return View(platform);
                 }
 
+                //Large files are not allowed
                 if (Request.Files[0].ContentLength > Convert.ToInt32(ConfigurationManager.AppSettings["MaxImageFileSize"]))
                 {
                     ModelState.AddModelError("", "The provided image is too large");
                     return View(platform);
                 }
 
+                //Save the image file to a temporary location to upload to the DB as varbinary
                 var uploadDir = Server.MapPath("~/App_Data/images");
                 Directory.CreateDirectory(uploadDir);
                 var filepath = Path.Combine(uploadDir, Path.GetRandomFileName() + ".png");
                 Request.Files[0].SaveAs(filepath);
-                Database.ExecuteStoredProcedureNonQuery("EditPlatform", System.IO.File.ReadAllBytes(filepath), "@Name=" + platform.Name, "@Type=" + platform.Type, "@ID=" + id);
+
+                //Call the stored procedure
+                platform.ID = id;
+                platform.Image = filepath;
+                StoredProcedures.EditPlatform(platform);
 
                 return RedirectToAction("Index", "Home");
             }
@@ -134,21 +173,29 @@ namespace MyCompletedGames.Controllers
         }
 
         // GET: Platforms/Delete/5
+        /// <summary>
+        /// Returns the Delete Platform View
+        /// </summary>
+        /// <param name="id">Platform Id</param>
+        /// <returns>Delete Platform View</returns>
         public ActionResult Delete(int id)
         {
-            foreach(var p in Database.ExecuteStoredProcedure("GetPlatformById", "@ID=" + id))
-                return View(new Platform() { Name = p["Name"].ToString() });
-
-            return View();
+            return View(StoredProcedures.GetPlatformById(id));
         }
 
         // POST: Platforms/Delete/5
+        /// <summary>
+        /// Deletes a Platform
+        /// </summary>
+        /// <param name="id">Platform Id</param>
+        /// <param name="platform">Platform data</param>
+        /// <returns>Delete Platform View if error. Redirects to Index if successful.</returns>
         [HttpPost]
         public ActionResult Delete(int id, Platform platform)
         {
             try
             {
-                Database.ExecuteStoredProcedureNonQuery("DeletePlatformById", null, "@ID=" + id);
+                StoredProcedures.DeletePlatformById(id);
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
