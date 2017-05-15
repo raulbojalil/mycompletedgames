@@ -3,7 +3,7 @@ CREATE TABLE Games (ID int IDENTITY(1,1) PRIMARY KEY, Name varchar(255) NOT NULL
 GO
 CREATE PROCEDURE CountPlatforms (@Search varchar(255)) AS SELECT COUNT(*) FROM Platforms WHERE Name LIKE '%' + @Search + '%'
 GO
-CREATE PROCEDURE DeletePlatformById (@ID int) AS DELETE FROM Platforms WHERE ID = @ID
+CREATE PROCEDURE DeletePlatformById (@ID int) AS DELETE FROM Games WHERE PlatformID = @ID DELETE FROM Platforms WHERE ID = @ID
 GO
 CREATE PROCEDURE EditPlatform (@ID int, @Name varchar(255), @Type int, @Image varBinary(MAX)) AS UPDATE Platforms SET Name = @Name, Type = @Type, Image = @Image WHERE ID = @ID
 GO

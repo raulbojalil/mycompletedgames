@@ -1,6 +1,7 @@
 ﻿using MyCompletedGames.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -35,6 +36,21 @@ namespace MyCompletedGames.Controllers
                 {
                     ModelState.AddModelError("", "An image file is required.");
                     return View();
+                }
+
+                var fileExtension = Path.GetExtension(Request.Files[0].FileName).ToLower();
+                var contentType = Request.Files[0].ContentType.ToLower();
+
+                if (fileExtension != ".jpg" && fileExtension != ".png" && fileExtension != ".jpeg" && contentType != "image/png" && contentType != "image/jpeg" && contentType != "image/jpg")
+                {
+                    ModelState.AddModelError("", "Invalid image file. Supported formats: .jpg, .png, .jpeg");
+                    return View(platform);
+                }
+
+                if (Request.Files[0].ContentLength > Convert.ToInt32(ConfigurationManager.AppSettings["MaxImageFileSize"]))
+                {
+                    ModelState.AddModelError("", "The provided image is too large");
+                    return View(platform);
                 }
 
                 var uploadDir = Server.MapPath("~/App_Data/images");
@@ -87,6 +103,21 @@ namespace MyCompletedGames.Controllers
                     return View(platform);
                 }
 
+                var fileExtension = Path.GetExtension(Request.Files[0].FileName).ToLower();
+                var contentType = Request.Files[0].ContentType.ToLower();
+
+                if (fileExtension != ".jpg" && fileExtension != ".png" && fileExtension != ".jpeg" && contentType != "image/png" && contentType != "image/jpeg" && contentType != "image/jpg")
+                {
+                    ModelState.AddModelError("", "Invalid image file. Supported formats: .jpg, .png, .jpeg");
+                    return View(platform);
+                }
+
+                if (Request.Files[0].ContentLength > Convert.ToInt32(ConfigurationManager.AppSettings["MaxImageFileSize"]))
+                {
+                    ModelState.AddModelError("", "The provided image is too large");
+                    return View(platform);
+                }
+
                 var uploadDir = Server.MapPath("~/App_Data/images");
                 Directory.CreateDirectory(uploadDir);
                 var filepath = Path.Combine(uploadDir, Path.GetRandomFileName() + ".png");
@@ -119,11 +150,6 @@ namespace MyCompletedGames.Controllers
             {
                 Database.ExecuteStoredProcedureNonQuery("DeletePlatformById", null, "@ID=" + id);
                 return RedirectToAction("Index", "Home");
-            }
-            catch(SqlException ex)
-            {
-                ViewBag.ErrorMessage = "This element cannot be deleted.";
-                return View();
             }
             catch (Exception ex)
             {
