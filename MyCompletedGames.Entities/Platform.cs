@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyCompletedGames.Models
+namespace MyCompletedGames.Entities
 {
     /// <summary>
     /// Represents a Game Platform, it can either be a Console, Handheld console or Computer/OS. 

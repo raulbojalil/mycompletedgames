@@ -186,6 +186,8 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\LoginViewModel.cs" />
+    <Compile Include="Models\RegisterViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -252,9 +254,9 @@
       <Project>{7ddc769c-88fc-4304-89f5-fc575638c61f}</Project>
       <Name>MyCompletedGames.DAL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MyCompletedGames.Models\MyCompletedGames.Models.csproj">
-      <Project>{f0f9ff3c-8102-4cfa-9866-a6426c3dfb1e}</Project>
-      <Name>MyCompletedGames.Models</Name>
+    <ProjectReference Include="..\MyCompletedGames.Entities\MyCompletedGames.Entities.csproj">
+      <Project>{a1de2f03-4c96-4b06-984e-cf6e1c648ba1}</Project>
+      <Name>MyCompletedGames.Entities</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

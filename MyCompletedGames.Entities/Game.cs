@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyCompletedGames.Models
+namespace MyCompletedGames.Entities
 {
     /// <summary>
     /// Represents a completed game. A platform can have 0..n completed games.

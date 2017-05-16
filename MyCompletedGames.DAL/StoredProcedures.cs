@@ -1,4 +1,4 @@
-﻿using MyCompletedGames.Models;
+﻿using MyCompletedGames.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
